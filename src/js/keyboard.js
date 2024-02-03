@@ -32,19 +32,6 @@ export class Keyboard {
     this.#inputEl.addEventListener("input", this.#onInput); // 한글을 공백으로(빈 string) 치환
   }
 
-  #onKeyDown(event) {
-    // 한글 조합에 대한 정규식 사용으로 한글 입력 에러 표시
-    // console.log(event.key, /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key));
-    this.#inputGroupEl.classList.toggle("error", /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key));
-
-    // OS마다 특수키 위치가 다름에 따라 제외를 위해 ?.) Optional chaining 사용 => 에러가 발생하는 것 대신에 표현식의 리턴 값은 undefined
-    this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
-    ?.classList.add('active');
-
-    this.#keyboradEl.addEventListener('mousedown', this.#onMouseDown);
-    document.addEventListener('mouseup', this.#onMouseUp.bind(this));
-  }
-
   #onMouseDown (event) {
     event.target.closest("div.key")?.classList.add('active'); //closest => 일치하는 요소를 찾을 때까지, 자기 자신을 포함해 위쪽(부모 방향, 문서 루트까지)으로 문서 트리를 순회합니다
   }
@@ -63,6 +50,20 @@ export class Keyboard {
     }
     this.#keyboradEl.querySelector(".active")?.classList.remove("active");
   }
+
+  #onKeyDown(event) {
+    // 한글 조합에 대한 정규식 사용으로 한글 입력 에러 표시
+    // console.log(event.key, /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key));
+    this.#inputGroupEl.classList.toggle("error", /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key));
+
+    // OS마다 특수키 위치가 다름에 따라 제외를 위해 ?.) Optional chaining 사용 => 에러가 발생하는 것 대신에 표현식의 리턴 값은 undefined
+    this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
+    ?.classList.add('active');
+
+    this.#keyboradEl.addEventListener('mousedown', this.#onMouseDown);
+    document.addEventListener('mouseup', this.#onMouseUp.bind(this));
+  }
+
   #onKeyUp(event) {
     this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
     ?.classList.remove('active');
