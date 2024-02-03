@@ -40,8 +40,29 @@ export class Keyboard {
     // OS마다 특수키 위치가 다름에 따라 제외를 위해 ?.) Optional chaining 사용 => 에러가 발생하는 것 대신에 표현식의 리턴 값은 undefined
     this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
     ?.classList.add('active');
+
+    this.#keyboradEl.addEventListener('mousedown', this.#onMouseDown);
+    document.addEventListener('mouseup', this.#onMouseUp.bind(this));
   }
 
+  #onMouseDown (event) {
+    event.target.closest("div.key")?.classList.add('active'); //closest => 일치하는 요소를 찾을 때까지, 자기 자신을 포함해 위쪽(부모 방향, 문서 루트까지)으로 문서 트리를 순회합니다
+  }
+  #onMouseUp (event) {
+    const keyEl = event.target.closest("div.key") 
+    const isActive =  !!keyEl?.classList.contains("active");// 타입캐스팅해서 옵셔널채이닝으로 반환되는 undefined 값은 false로 변경
+    const val = keyEl?.dataset.val;
+    if(isActive && !!val && val !== "Space" && val !== "Backspace") {
+      this.#inputEl.value += val;
+    }
+    if(isActive &&val === "Space"){
+      this.#inputEl.value += " ";
+    }
+    if(isActive &&val === "Backspace"){
+      this.#inputEl.value = this.#inputEl.value.slice(0, -1); // 마지막 String 값을 자워서 값에 넣음
+    }
+    this.#keyboradEl.querySelector(".active")?.classList.remove("active");
+  }
   #onKeyUp(event) {
     this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
     ?.classList.remove('active');
