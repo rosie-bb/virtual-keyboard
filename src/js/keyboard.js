@@ -5,6 +5,8 @@ export class Keyboard {
   #keyboradEl;
   #inputGroupEl;
   #inputEl;
+  #keyPress = false;
+  #mouseDown = false;
 
   constructor() { // 키보드 클래스 인스턴스가 실행될 때 아래 메소드를 생성하고 초기화한다.
     this.#assignElement();
@@ -23,19 +25,22 @@ export class Keyboard {
   #addEvent() {
     // console.log(this.#swichEl);
     this.#swichEl.addEventListener("change", this.#onChangeTheme);
-
     this.#fontSelectEl.addEventListener("change", this.#onChangeFont);
-
     document.addEventListener("keydown" , this.#onKeyDown.bind(this));
     document.addEventListener("keyup" , this.#onKeyUp.bind(this));
-
     this.#inputEl.addEventListener("input", this.#onInput); // 한글을 공백으로(빈 string) 치환
+    this.#keyboradEl.addEventListener('mousedown', this.#onMouseDown.bind(this));
+    document.addEventListener('mouseup', this.#onMouseUp.bind(this));
   }
 
   #onMouseDown (event) {
+    if(this.#keyPress) return;
+    this.#mouseDown = false;
     event.target.closest("div.key")?.classList.add('active'); //closest => 일치하는 요소를 찾을 때까지, 자기 자신을 포함해 위쪽(부모 방향, 문서 루트까지)으로 문서 트리를 순회합니다
   }
   #onMouseUp (event) {
+    if(this.#keyPress) return;
+    this.#mouseDown = true;
     const keyEl = event.target.closest("div.key") 
     const isActive =  !!keyEl?.classList.contains("active");// 타입캐스팅해서 옵셔널채이닝으로 반환되는 undefined 값은 false로 변경
     const val = keyEl?.dataset.val;
@@ -52,6 +57,9 @@ export class Keyboard {
   }
 
   #onKeyDown(event) {
+    if(this.#mouseDown) return;
+    this.#keyPress = true;
+
     // 한글 조합에 대한 정규식 사용으로 한글 입력 에러 표시
     // console.log(event.key, /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key));
     this.#inputGroupEl.classList.toggle("error", /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key));
@@ -60,11 +68,14 @@ export class Keyboard {
     this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
     ?.classList.add('active');
 
-    this.#keyboradEl.addEventListener('mousedown', this.#onMouseDown);
+    this.#keyboradEl.addEventListener('mousedown', this.#onMouseDown.bind(this));
     document.addEventListener('mouseup', this.#onMouseUp.bind(this));
   }
 
   #onKeyUp(event) {
+    if(this.#mouseDown) return;
+    this.#keyPress = false;
+
     this.#keyboradEl.querySelector(`[data-code = ${event.code}]`)
     ?.classList.remove('active');
   } 
